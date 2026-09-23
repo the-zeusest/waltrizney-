@@ -35,7 +35,10 @@
   }
 
   function iconLabel(filename) {
-    return filename.replace(/\.(png|jpe?g|webp|gif)$/i, "").replace(/[-_]+/g, " ").replace(/\b\w/g, letter => letter.toUpperCase());
+    return filename
+      .replace(/\.(png|jpe?g|webp|gif)$/i, "")
+      .replace(/[-_]+/g, " ")
+      .replace(/\b\w/g, letter => letter.toUpperCase());
   }
 
   function fallback(className = "song-animal-fallback") {
@@ -73,20 +76,21 @@
     updatingCards = true;
     try {
       const rows = songRows();
-      document.querySelectorAll("#cards .card").forEach((card, position) => {
+      document.querySelectorAll("#cards .card").forEach(card => {
+        const link = card.querySelector("a");
+        const match = link?.textContent.match(/(\d+)/);
+        const songIndex = match ? Number(match[1]) - 1 : -1;
+        const animalFile = iconFiles[songIndex];
         const heading = card.querySelector("strong");
-        const label = `Card ${position + 1}`;
+        const label = animalFile ? iconLabel(animalFile.name) : "Animal";
         if (heading && heading.textContent !== label) heading.textContent = label;
         card.querySelector(".symbol")?.remove();
         if (card.querySelector(".card-animal-icon, .card-animal-fallback")) return;
 
-        const link = card.querySelector("a");
-        const match = link?.textContent.match(/(\d+)/);
-        const songIndex = match ? Number(match[1]) - 1 : -1;
         const rowIcon = rows[songIndex]?.querySelector(".song-animal-icon");
         const icon = rowIcon
           ? rowIcon.cloneNode(true)
-          : (iconFiles[songIndex] ? makeImage(iconFiles[songIndex], "card-animal-icon") : fallback("card-animal-fallback"));
+          : (animalFile ? makeImage(animalFile, "card-animal-icon") : fallback("card-animal-fallback"));
         icon.className = rowIcon ? "card-animal-icon" : icon.className;
         card.prepend(icon);
       });
@@ -102,7 +106,9 @@
     try {
       const response = await fetch(API_URL, { headers: { Accept: "application/vnd.github+json" } });
       if (!response.ok) throw new Error(`Icon list request failed: ${response.status}`);
-      iconFiles = (await response.json()).filter(file => file && file.type === "file" && /\.(png|jpe?g|webp|gif)$/i.test(file.name)).sort((a, b) => a.name.localeCompare(b.name));
+      iconFiles = (await response.json())
+        .filter(file => file && file.type === "file" && /\.(png|jpe?g|webp|gif)$/i.test(file.name))
+        .sort((a, b) => a.name.localeCompare(b.name));
     } catch (error) {
       console.warn("Animal icons could not be loaded; using paw-print placeholders.", error);
     }

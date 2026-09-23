@@ -23,7 +23,7 @@
         flex: 0 0 64px;
         object-fit: contain;
         border-radius: 10px;
-        background: rgba(192, 132, 252, .12);
+        background: #000;
         padding: 2px;
       }
       .song-animal-fallback {
@@ -33,24 +33,49 @@
         height: 64px;
         flex: 0 0 64px;
         font-size: 2.2rem;
+        background: #000;
+        border-radius: 10px;
       }
       .song-title { min-width: 0; }
+      #cards {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+      #cards .card {
+        min-height: 0;
+        height: auto;
+        padding: 10px 8px;
+        background: #000;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+      }
+      #cards .card .symbol { display: none; }
+      #cards .card strong { margin: 0 0 4px; }
       .card-animal-icon {
         display: block;
-        width: 94px;
-        height: 94px;
-        margin: 8px auto 10px;
+        width: 112px;
+        height: 112px;
+        margin: 0 auto 6px;
         object-fit: contain;
         border-radius: 12px;
-        background: rgba(192, 132, 252, .12);
-        padding: 2px;
+        background: #000;
+        padding: 0;
       }
       .card-animal-fallback {
         display: block;
+        width: 112px;
+        height: 112px;
+        margin: 0 auto 6px;
+        padding-top: 28px;
+        box-sizing: border-box;
+        text-align: center;
         font-size: 3rem;
         line-height: 1;
-        margin: 12px auto;
-        text-align: center;
+        background: #000;
+        border-radius: 12px;
       }
       @media (max-width: 640px) {
         .song-animal-icon, .song-animal-fallback {
@@ -58,7 +83,10 @@
           height: 52px;
           flex-basis: 52px;
         }
-        .card-animal-icon { width: 76px; height: 76px; }
+        #cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+        #cards .card { padding: 8px 5px; }
+        .card-animal-icon, .card-animal-fallback { width: 82px; height: 82px; }
+        .card-animal-fallback { padding-top: 20px; font-size: 2.3rem; }
       }
     `;
     document.head.appendChild(style);
@@ -103,8 +131,12 @@
 
   function addCardIcons() {
     const rows = songRows();
-    document.querySelectorAll("#cards .card").forEach(card => {
+    document.querySelectorAll("#cards .card").forEach((card, position) => {
+      const heading = card.querySelector("strong");
+      if (heading) heading.textContent = `Card ${position + 1}`;
+      card.querySelector(".symbol")?.remove();
       if (card.querySelector(".card-animal-icon, .card-animal-fallback")) return;
+
       const link = card.querySelector("a");
       const match = link?.textContent.match(/(\d+)/);
       const songIndex = match ? Number(match[1]) - 1 : -1;
